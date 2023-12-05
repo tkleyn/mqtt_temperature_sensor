@@ -9,39 +9,46 @@ void wifi_mqtt_init()
 {
 	WiFi.mode(WIFI_STA);
 
-	wifi_connect(10);
 	espClient.setCACert(root_ca);
 	client.setServer(mqtt_server, mqtt_port);
 	client.setSocketTimeout(5);
 }
 
-void wifi_connect(int timeout)
+int8_t wifi_connect(uint8_t timeout)
 {
-	int elapsed_time = 0;
-	Serial.print("Connecting to WiFi..");
-
-	WiFi.begin(ssid, password);
-
-	while (WiFi.status() != WL_CONNECTED && elapsed_time < timeout * 1000) {
-		delay(500);
-		Serial.print(".");
-		elapsed_time += 500;
-	}
-
-	if (WiFi.status() == WL_CONNECTED)
+	if (WiFi.status() != WL_CONNECTED)
 	{
-		Serial.println("connected!");
-		Serial.print("IP address: ");
-		Serial.println(WiFi.localIP());
-	} 
-	else
-	{
-		Serial.println("connection failed.");
+		int elapsed_time = 0;
+		Serial.print("Connecting to WiFi..");
+
+		WiFi.begin(ssid, password);
+
+		while (WiFi.status() != WL_CONNECTED && elapsed_time < timeout * 1000) {
+			delay(500);
+			Serial.print(".");
+			elapsed_time += 500;
+		}
+
+		if (WiFi.status() == WL_CONNECTED)
+		{
+			Serial.println("connected!");
+			Serial.print("IP address: ");
+			Serial.println(WiFi.localIP());
+			return (WL_CONNECTED);
+		} 
+		else
+		{
+			Serial.println("connection failed.");
+			return (WL_CONNECT_FAILED);
+		}
 	}
+	return (WL_CONNECTED);
 }
 
-void mqtt_connect() 
+int8_t mqtt_connect(uint8_t timeout) 
 {
+	int elapsed_time = 0;
+
 	while (!client.connected())
 	{
 		Serial.println("\nAttempting MQTT connection…");
@@ -51,14 +58,19 @@ void mqtt_connect()
 		if (client.connect(clientId.c_str(), mqtt_username, mqtt_password))
 		{
 			Serial.println("connected");
-		} 
+		}
+		else if(elapsed_time < timeout * 1000 )
+		{
+			delay(500);
+			Serial.print(".");
+			elapsed_time += 500;
+		}
 		else 
 		{
-			Serial.print("MQTT Connection failed, rc = ");
-			Serial.print(client.state());
-			delay(5000);
+			return (client.state());
 		}
 	}
+	return (MQTT_CONNECTED);
 }
 
 //======================================= publising as string

@@ -67,17 +67,6 @@ void setup()
 
 void loop() 
 {
-	if (WiFi.status() != WL_CONNECTED)
-	{
-		wifi_connect(10);
-	}
-
-	if (!client.connected())
-	{
-		Serial.println("MQTT client not connected.");
-		mqtt_connect();
-	}
-
 	///temp = sht.getTemperature();
 	//humidity = sht.getHumidity();
 	///timestamp = ;
@@ -86,10 +75,16 @@ void loop()
 	humidity = 65.2;
 	timestamp = get_time_str();
 
-	if (client.connected() != MQTT_CONNECTED)
+	if (wifi_connect(5))
 	{
-		Serial.println("MQTT client not connected.");
-		mqtt_connect();
+		Serial.println("Failed to connect to Wi-Fi. Exiting... ");
+		exit (-1);
+	}
+
+	if (mqtt_connect(5))
+	{
+		Serial.println("Failed to connect to MQTT broker. Exiting... ");
+		exit (-1);
 	}
 
 	publishMessage(topic_temperature, (String(temp)), true);

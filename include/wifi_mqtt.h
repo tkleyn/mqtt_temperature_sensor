@@ -14,10 +14,10 @@ extern PubSubClient client;
 void  wifi_mqtt_init();
 
 //
-void wifi_connect(int timeout);
+int8_t wifi_connect(uint8_t timeout);
 
 //
-void mqtt_connect();
+int8_t mqtt_connect(uint8_t timeout);
 
 //publising as string
 void publishMessage(const char* topic, String payload , boolean retained);
