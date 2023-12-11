@@ -5,7 +5,7 @@
 #include <WiFiClientSecure.h>
 #include <PubSubClient.h>
 
-***REMOVED***
+#include "cred.h"
 
 extern WiFiClientSecure espClient;
 extern PubSubClient client;

@@ -6,7 +6,7 @@
 extern const char* ssid; 
 extern const char* password;
 
-***REMOVED***
+//---- MQTT Broker settings
 extern const char* mqtt_server;
 extern const char* mqtt_username;
 extern const char* mqtt_password;
