@@ -1,13 +1,20 @@
 //main.cpp
 #include <Arduino.h>
 #include <time.h>
-#include <Wire.h>
+#include "Wire.h"
+#include "SHT2x.h"
 
-///#include <Wire.h>
-///include <tinySHT2x.h>
 ///#include <NTPClient.h>
 
 #include "wifi_mqtt.h"
+
+uint32_t start;
+uint32_t stop;
+
+#define SDA   16
+#define SCL   17
+
+SHT2x sht;
 
 //------Configs NTP
 const char* ntpServer = "pool.ntp.org";
@@ -43,12 +50,13 @@ void printLocalTime()
 
 String get_time_str()
 {
-	struct tm timeinfo;
+	/*struct tm timeinfo;
 	while(!getLocalTime(&timeinfo))
 	{
-	Serial.println("Failed to obtain time");
+		Serial.println("Failed to obtain time");
 	}
 	//return (String(&timeinfo));
+	*/
 	return String("Mon 25/03 12:23");
 }
 
@@ -56,32 +64,35 @@ void setup()
 {
 	Serial.begin(9600);
 
-	///sht.begin();
-
 	wifi_mqtt_init();
 
 	//init and get the time
 	configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-	printLocalTime();
+	//printLocalTime();
+
+	Wire.begin(SDA, SCL);
+	sht.begin();
+
+	uint8_t stat = sht.getStatus();
+	Serial.print(stat, HEX);
+	Serial.println();
 }
 
 void loop() 
 {
-	///temp = sht.getTemperature();
-	//humidity = sht.getHumidity();
-	///timestamp = ;
+	sht.read();
 
-	temp = 17.5;
-	humidity = 65.2;
+	temp = sht.getTemperature();
+	humidity = sht.getHumidity();
 	timestamp = get_time_str();
 
-	if (wifi_connect(5))
+	if (wifi_connect(10) != WL_CONNECTED)
 	{
 		Serial.println("Failed to connect to Wi-Fi. Exiting... ");
 		exit (-1);
 	}
 
-	if (mqtt_connect(5))
+	if (mqtt_connect(10) != MQTT_CONNECTED)
 	{
 		Serial.println("Failed to connect to MQTT broker. Exiting... ");
 		exit (-1);

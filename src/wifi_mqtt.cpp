@@ -20,7 +20,7 @@ int8_t wifi_connect(uint8_t timeout)
 	{
 		int elapsed_time = 0;
 		Serial.print("Connecting to WiFi..");
-
+ 
 		WiFi.begin(ssid, password);
 
 		while (WiFi.status() != WL_CONNECTED && elapsed_time < timeout * 1000) {
